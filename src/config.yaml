@@ -1,0 +1,23 @@
+project: CAESAR
+
+serial:
+    CPC:  /dev/ttyS3     # PORT designation for CPC
+
+LJ:
+    ID: -1               # ID of Labjack, -1 == first found
+    AIN:                 # Designation of Ana
+        V: 0             # Ultravolt HV read 
+        I: 1             # Ultravolt current read 
+    FIO:
+        counter1: 0      # FIO0 is a counter
+        counter2: 1      # FIO1 is a counter
+
+CPC:
+    model: MAGIC         # CPC used in system
+
+DMA:                     # Configuration of DMA
+    model: TSILONG       # TSI Long Column
+    Qsh: 5.0             # Sheath flow [L min-1]
+    Qsa: 0.45            # Sample flow [L min-1]
+    T: 22.0              # Temperature [degree C]
+    p: 101315.0          # Pressure [Pa]
