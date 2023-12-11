@@ -59,6 +59,7 @@ Gateway: 192.168.84.2
 (6) Shutdown computer
 (7) Shutdown power strip
 (8) Run shutdown menu on CCN
+(9) Power off unit
 
 ### Optional
 Check on Linux that NTP service is running and synchronized
