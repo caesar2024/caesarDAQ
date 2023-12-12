@@ -1,76 +1,109 @@
-# CAESAR SOP
+# CAESAR Standard Operating Procedure
 
-## Aircraft IP addresses: 
-SMPS: 192.168.84.44 (Centos)
-CCN: 192.168.84.45 (Win 10 Enterprise)
-SP2: 192.168.84.46 (Win 10)
+Notes to start and shutdown the UCR CCN, SMPS, and SP2 instrument for the CAESAR campaign.
 
-NTP Server: 192.168.84.10
-Gateway: 192.168.84.2
+## Aircraft IP addresses 
+### UCR
+SMPS: 192.168.84.44 (Centos) <br>
+CCN: 192.168.84.45 (Win 10 Enterprise)<br>
+SP2: 192.168.84.46 (Win 10) <br>
 
+### NCAR
+NTP Server: 192.168.84.10 <br>
+Gateway: 192.168.84.2 <br>
+
+# Startup System
 ## CCNc
-(0) Verify that CCN supply bottle is sufficiently full (more than 200 ml for a flight)
-(1) Turn on CCN using po wer button on the top left.
-(2) Set SS program
-(3) Check that temperature stabilizes (may take a few minutes)
-(4) Check that flow stabilizes (may take a few minutes)
-(5) Check that CCN is draining (watch bubble move to drain bottle)
-(6) Check that CCN is filling (watch bubble move from supply bottle)
+The CCNc main computer for UCR to monitor instruments. This instrument should be started first. It is powered by 28 VDC and plugged into the bottom.   
+
+1. Verify that CCN supply bottle is sufficiently full (more than 200 ml for a flight)
+2. Turn on CCN using power button on the top left.
+3. Set supersaturation program. 
+4. Check that temperature stabilizes (may take a few minutes)
+5. Check that flow stabilizes (may take a few minutes)
+6. Check that CCN is draining (watch bubble move to drain bottle)
+7. Check that CCN is filling (watch bubble move from supply bottle)
 
 ## SMPS
-(0) Verify that valve is set to SDI inlet (handle should point toward cockpit)
-(1) Turn on power strip.
-(2) Verify that system is powered up. Left screen should boot. Double tab Firefox button on touchscreen after boot to show gui.
-(3) Verify that CPC is powered on and warms up.
-(4) Verify that system is scanning voltage and the CPC concentration varies with voltage. **Note: needs SP2 powered up and pump turned on.**
-(5) Check that Serial and Pulse are both reading
+1. Verify that valve is set to SDI inlet (handle should point toward cockpit)
+2. Turn on power strip. 
+3. Plug in the sheath flow pump. This pump must go into it's dedicated outlet box 3 (one of the two sockets where the line terminates). 
+4. Verify that system is powered up. Left screen should boot. Double tab Firefox button on touchscreen after boot to show gui.
+5. Verify that CPC is powered on and warms up.
+6. Verify that system is scanning voltage and the CPC concentration varies with voltage. 
+
+> [!NOTE] For the CPC flow to work, the SP2 needs to be powered up and pump turned on. See below.
+
+7. Check that serial port and pulse output are both displaying concentration. Check below for remote setup.
 
 ## SP2
-(0) When power strip is on, press start button of SP2. It's behind the seat. Ask CVI operator for help if it cannot reached.
-(1) Verify windows login screen on right computer.
+1. Verify that power strip is on.
+2. Press start button of SP2. It's behind the seat. Ask CVI operator for help if it cannot reached.
+3. Verify that windows user is logged in on the right computer.
 
 
 ## Remote Connection from CCNc
-(0) Start Remote Desktop Connection to 192.168.84.46 and USER
-(1) Start SP2 Software
-(2) Turn on SP2 Pump in Control tab
-(3) Let flow stabilize to 120 ccm
-(4) Start Laser in Control tab
-(5) Start writing data to file
 
-(6) Open PowerShell
-(7) Start SSH tunnel: ssh -L 8000:127.0.0.1:8000 aerosol@192.168.84.44 (use up-arrow). Keep this window open
-(8) Open Edge
-(9) Open file `gui.html` in Documents folder (CTRL-O) for open
-(10) Exit fullsreen of remote. Arrange screens. 
-(11) Move remote connection to Desktop 2. Arrange SP2 and SMPS gui for optimal viewing. 
+### Setup remote to SP2 computer
+1. Start `Remote Desktop Connection` to `192.168.84.46` and `USER`. (Super + Remote should bring up the remote desktop software. The values should be keyed in).
+2. Move the remote screen to `Desktop 2`. To do so 
+- Exit full screen
+- Hit Super-Tab
+- Move to desktop 2
+ 
+3. Go into fullscreen mode again
+
+### Startup SP2  
+1. Start SP2 Software
+2. Turn on SP2 Pump in `Control` tab
+3. Let flow stabilize to 120 ccm. Watch on first tab
+4. Start Laser in `Control` tab
+5. Check that all detectors are reading. Check that there is a scattering and incandescence time series.
+6. Start writing data to file
+> [!IMPORTANT]  
+If you miss this step, the SP2 will not collect data and you will be very unhappy during the debriefing.
+
+### Startup SMPS viewer on SP2 computer
+1. Open PowerShell
+2. Start SSH tunnel: ssh -L 8000:127.0.0.1:8000 aerosol@192.168.84.44 (use up-arrow so you don't have to type this). 
+3. Keep this window open. You can use to check the running DAQ system on the SMPS computer. You also need it so that the `gui.html` works, since it polls 127.0.0.1 and this is served via port forwarding through `ssh`
+4. Open Edge Browser
+5. Open file `gui.html` in `Documents` folder (CTRL-O) for open file. It should bring up the three plots. Verify that they are updating.
+- Verify the CPC flow rate is 0.4 Lpm
+- Verify that both pulse and serial output are reading
+- Verify that voltage is scanning
+6. Exit fullsreen of remote.  
 
 ## Verify Time Synchronization
-(1) Times in UTC
-(2) Times Accurate
-(3) Timeserver Synchronized
+1. Check that all times in UTC
+2. Check that timeserver is synchronized. 
 
-## Shutdown
-(0) Run `sudo shutdown --now` in PowerShell ssh connection 
-(1) Stop laser in control tab
-(2) Stop pump in control tab
-(3) Exit SP2 software
-(5) Exit Edge
-(6) Shutdown computer
-(7) Shutdown power strip
-(8) Run shutdown menu on CCN
-(9) Power off unit
+### Linux
+```bash
+chronyc sources
+```
 
-### Optional
-Check on Linux that NTP service is running and synchronized
-chronyc sources (must run as sudo)
+(must run as sudo)
 
-Compare clocks
+Compare clocks to the second.
 
-### Manual NTP Server Windows
-sc stop w32time
-w32tm /unregister
-w32tm /register
-sc start w32time
-w32tm /config /update /syncfromflags:manual /manualpeerlist:192.168.84.10
-w32tm /resync /rediscover /nowait
+### Windows
+Run these in PowerShell
+
+1. `sc start w32time`
+2. `w32tm /config /update /syncfromflags:manual /manualpeerlist:192.168.84.10`
+3. `w32tm /resync /rediscover /nowait`
+
+
+# Shutdown
+1. Run `sudo shutdown --now` in PowerShell ssh connection on SP2 computer 
+2. Stop laser in control tab
+3. Stop pump in control tab
+4. Exit SP2 software
+5. Exit Edge Browser
+6. Shutdown SP2 Computer (Power Off through Windows)
+7. Shutdown power strip. Unplug sheath flow pump
+8. Run shutdown menu on CCN
+9. Power off CCNc unit
+10. Exit aircraft
+
